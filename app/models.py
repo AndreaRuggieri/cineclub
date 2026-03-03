@@ -151,3 +151,13 @@ class Vote(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (UniqueConstraint("series_film_id", "criterion_id", "user_id", name="uq_vote"),)
+    
+class AppSetting(Base):
+    """
+    Key/value settings controllabili dal superadmin.
+    Esempi: feature flags, limiti, moderazione, ecc.
+    """
+    __tablename__ = "app_settings"
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

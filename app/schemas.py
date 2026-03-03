@@ -18,6 +18,10 @@ class MeOut(BaseModel):
     username: str
     is_superadmin: bool
 
+# ---------- COMMON ----------
+class DecisionIn(BaseModel):
+    approve: bool
+
 # ---------- CLUB ----------
 class ClubCreateIn(BaseModel):
     name: str
@@ -38,10 +42,29 @@ class ClubOut(BaseModel):
 
 class ClubMemberOut(BaseModel):
     user_id: str
+    username: str
     role: str
+    created_at: datetime
+
+class ClubMemberAddByUsernameIn(BaseModel):
+    username: str
+
+class ClubMemberRoleUpdateIn(BaseModel):
+    role: Literal["MEMBER","ADMIN"]
+
+class ClubJoinRequestOut(BaseModel):
+    id: str
+    club_id: str
+    user_id: str
+    username: str
+    status: str
+    created_at: datetime
+    decided_at: Optional[datetime] = None
+    decided_by: Optional[str] = None
 
 class InviteOut(BaseModel):
     token: str
+    expires_at: Optional[datetime] = None
 
 # ---------- SERIES ----------
 class CriterionIn(BaseModel):
@@ -52,6 +75,25 @@ class CriterionIn(BaseModel):
     min_value: float = 0.0
     max_value: float = 5.0
     step: float = 0.5
+
+class CriterionOut(BaseModel):
+    id: str
+    series_id: str
+    key: str
+    label: str
+    is_required: bool
+    is_enabled: bool
+    min_value: float
+    max_value: float
+    step: float
+
+class CriterionUpdateIn(BaseModel):
+    label: Optional[str] = None
+    is_required: Optional[bool] = None
+    is_enabled: Optional[bool] = None
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    step: Optional[float] = None
 
 class SeriesCreateIn(BaseModel):
     club_id: str
@@ -75,10 +117,39 @@ class SeriesOut(BaseModel):
     created_by: str
     created_at: datetime
 
+class SeriesJoinRequestOut(BaseModel):
+    id: str
+    series_id: str
+    user_id: str
+    username: str
+    status: str
+    created_at: datetime
+    decided_at: Optional[datetime] = None
+    decided_by: Optional[str] = None
+
+class SeriesParticipantOut(BaseModel):
+    user_id: str
+    username: str
+    role: str
+    created_at: datetime
+
+class SeriesParticipantsPatchIn(BaseModel):
+    add_user_ids: List[str] = []
+    remove_user_ids: List[str] = []
+
+class SeriesParticipantRoleUpdateIn(BaseModel):
+    role: Literal["PARTICIPANT","ADMIN"]
+
 # ---------- FILMS ----------
 class FilmCreateIn(BaseModel):
     title: str
     poster_url: Optional[str] = None
+
+class FilmOut(BaseModel):
+    id: str
+    title: str
+    poster_url: Optional[str]
+    created_at: datetime
 
 class SeriesFilmAddIn(BaseModel):
     film_id: str
@@ -97,11 +168,48 @@ class SeriesFilmOut(BaseModel):
 class VotingToggleIn(BaseModel):
     is_voting_open: bool
 
+# ---------- PUBLIC VIEWS ----------
+class PublicSeriesFilmOut(BaseModel):
+    id: str
+    film_id: str
+    title: str
+    poster_url: Optional[str]
+    sort_order: int
+    is_voting_open: bool
+
+class PublicSeriesOut(BaseModel):
+    id: str
+    club_id: str
+    title: str
+    theme: str
+    num_films: int
+    start_date: Optional[date]
+    end_date: Optional[date]
+    created_at: datetime
+    films: List[PublicSeriesFilmOut]
+
+class ClubPublicOut(BaseModel):
+    id: str
+    name: str
+    description: str
+    location_level: str
+    location_label: str
+    series: List[PublicSeriesOut]
+
 # ---------- VOTES / STATS ----------
 class VoteIn(BaseModel):
     series_film_id: str
     criterion_key: str
     value: float
+
+class VoteOut(BaseModel):
+    id: str
+    series_film_id: str
+    criterion_key: str
+    user_id: str
+    value: float
+    created_at: datetime
+    updated_at: datetime
 
 class CriterionStats(BaseModel):
     criterion_key: str
@@ -119,3 +227,12 @@ class FilmStatsOut(BaseModel):
 class SeriesStatsOut(BaseModel):
     series_id: str
     films: List[FilmStatsOut]
+
+# ---------- APP SETTINGS (SUPERADMIN) ----------
+class AppSettingUpsertIn(BaseModel):
+    value: str
+
+class AppSettingOut(BaseModel):
+    key: str
+    value: str
+    updated_at: datetime
